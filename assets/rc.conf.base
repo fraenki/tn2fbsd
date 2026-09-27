@@ -1,0 +1,31 @@
+# Defaults
+avahi_daemon_enable="YES"
+background_fsck="NO"
+clear_tmp_enable="YES"
+devd_flags="-q"
+fsck_y_enable="YES"
+geli_autodetach="NO"
+hostname="truenas"
+microcode_update_enable="YES"
+ntpd_enable="YES"
+ntpd_sync_on_start="YES"
+openssh_enable="YES"
+openssh_skipportscheck="YES"
+root_rw_mount="YES"
+savecore_enable="NO"
+sendmail_enable="NO"
+sendmail_outbound_enable="NO"
+sendmail_msp_queue_enable="NO"
+sendmail_submit_enable="NO"
+syslogd_flags="-ss"
+zfsd_enable="YES"
+
+# open-vm-tools
+vmware_guest_vmblock_enable="YES"
+vmware_guest_vmhgfs_enable="YES"
+vmware_guest_vmmemctl_enable="YES"
+
+# Turbo boost
+performance_cpu_freq="HIGH"
+performance_cx_lowest="Cmax"
+economy_cx_lowest="Cmax"
