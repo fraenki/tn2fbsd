@@ -22,7 +22,7 @@ ssh_authorized_keys_absent = "SSH: root's authorized_keys is not in the export (
 ssh_enabled = "SSH: the base-system sshd is enabled (sshd_enable) instead of the ports OpenSSH (openssh_enable). Review /etc/ssh/sshd_config before starting sshd."
 cron = "Cron jobs: the enabled TrueNAS cron jobs were written to {path}. On FreeBSD cron(8) runs them directly as the listed user; review the commands and their paths before enabling cron."
 scrub = "ZFS scrub: FreeBSD's periodic(8) scrub runs daily and only starts a scrub once the per-pool threshold (days) has elapsed. The original per-task cron schedule is not preserved."
-zettarepl = "zettarepl: install the zettarepl port/package, then enable the service with `sysrc zettarepl_enable=YES` and start it with `service zettarepl start`."
+zettarepl = "zettarepl: install the [zettarepl port/package](https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=298860), then enable the service with `sysrc zettarepl_enable=YES` and start it with `service zettarepl start`."
 zettarepl_secret = "zettarepl.yaml contains private SSH key material; keep it mode 0600."
 smb_install = "SMB: install the Samba package with `pkg install samba423`. The generated rc.conf already enables the service (samba_server_enable); start it with `service samba_server start`."
 smb = "SMB: share sections were generated from the configuration database. TrueNAS-specific VFS modules were omitted for stock FreeBSD samba. If a share relies on exact TrueNAS behaviour, copy the original /var/db/system/samba4/registry.tdb and set 'registry shares = yes' / 'include = registry' in smb4.conf instead."
