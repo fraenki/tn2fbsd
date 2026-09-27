@@ -27,6 +27,13 @@ class SourceError(RuntimeError):
 
 class Source:
     def __init__(self, tar_path):
+        # Reject a missing, non-regular, or unreadable path before opening it.
+        if not os.path.exists(tar_path):
+            raise SourceError(f"{tar_path}: no such file")
+        if not os.path.isfile(tar_path):
+            raise SourceError(f"{tar_path}: not a regular file")
+        if not os.access(tar_path, os.R_OK):
+            raise SourceError(f"{tar_path}: not readable (check permissions)")
         self._tmp = tempfile.TemporaryDirectory(prefix="tn2fbsd-")
         try:
             with tarfile.open(tar_path) as tar:
