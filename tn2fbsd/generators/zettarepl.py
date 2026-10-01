@@ -3,11 +3,32 @@
 Mirrors the definition assembled by the middleware
 (plugins/zettarepl.py ``get_definition``).
 """
+import re
+
 import yaml
 
-from .. import ASSETS_DIR, pwenc
+from .. import pwenc
 from ..db import as_bool, json_list
 from ..text import text
+
+
+def _task_key(value, task_id, used):
+    """Build a zettarepl task key from a free-text value.
+
+    Keeps [A-Za-z0-9] runs joined by single underscores (so a TrueNAS task
+    name or dataset path becomes a readable key), falls back to "task_<id>"
+    when nothing usable remains, and appends _2, _3, ... to stay unique within
+    its section. The chosen key is recorded in ``used``.
+    """
+    base = re.sub(r"[^A-Za-z0-9]+", "_", value or "").strip("_") or f"task_{task_id}"
+    key = base
+    suffix = 2
+    while key in used:
+        key = f"{base}_{suffix}"
+        suffix += 1
+    used.add(key)
+    return key
+
 
 UNIT_SECONDS = {
     "DAY": 86400,
@@ -39,8 +60,12 @@ def _schedule(minute, hour, daymonth, month, dayweek, begin=None, end=None):
 
 def _periodic_snapshot_tasks(db):
     tasks = {}
+    key_by_id = {}
+    used = set()
     for task in db.all("storage_task", where="task_enabled=1", order="id"):
-        tasks[f"task_{task['id']}"] = {
+        key = _task_key(task["task_dataset"], task["id"], used)
+        key_by_id[task["id"]] = key
+        tasks[key] = {
             "dataset": task["task_dataset"],
             "recursive": as_bool(task["task_recursive"]),
             "exclude": json_list(task["task_exclude"]),
@@ -53,7 +78,7 @@ def _periodic_snapshot_tasks(db):
             ),
             "allow-empty": as_bool(task["task_allow_empty"]),
         }
-    return tasks
+    return tasks, key_by_id
 
 
 def _transport(ctx, repl):
@@ -94,8 +119,9 @@ def _transport(ctx, repl):
     return transport, True
 
 
-def _replication_tasks(ctx):
+def _replication_tasks(ctx, snapshot_key_by_id):
     tasks = {}
+    used = set()
     uses_secret = False
     for repl in ctx.db.all("storage_replication", where="repl_enabled=1", order="id"):
         transport, secret = _transport(ctx, repl)
@@ -115,11 +141,12 @@ def _replication_tasks(ctx):
         if naming_schema:
             definition["naming-schema"] = naming_schema
         bound = [
-            f"task_{row['task_id']}"
+            snapshot_key_by_id[row["task_id"]]
             for row in ctx.db.all(
                 "storage_replication_repl_periodic_snapshot_tasks",
                 where=f"replication_id={repl['id']}",
             )
+            if row["task_id"] in snapshot_key_by_id
         ]
         if bound:
             definition["periodic-snapshot-tasks"] = bound
@@ -134,13 +161,13 @@ def _replication_tasks(ctx):
             definition["lifetime"] = _lifetime(
                 repl["repl_lifetime_value"], repl["repl_lifetime_unit"]
             )
-        tasks[f"task_{repl['id']}"] = definition
+        tasks[_task_key(repl["repl_name"], repl["id"], used)] = definition
     return tasks, uses_secret
 
 
 def generate(ctx):
-    snapshot_tasks = _periodic_snapshot_tasks(ctx.db)
-    replication_tasks, uses_secret = _replication_tasks(ctx)
+    snapshot_tasks, snapshot_key_by_id = _periodic_snapshot_tasks(ctx.db)
+    replication_tasks, uses_secret = _replication_tasks(ctx, snapshot_key_by_id)
     if not snapshot_tasks and not replication_tasks:
         return
 
