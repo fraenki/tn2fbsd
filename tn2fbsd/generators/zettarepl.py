@@ -30,6 +30,20 @@ def _task_key(value, task_id, used):
     return key
 
 
+class _BlockStringDumper(yaml.SafeDumper):
+    """SafeDumper that renders multi-line strings as literal block scalars."""
+
+
+def _represent_str(dumper, data):
+    # A plain/quoted scalar folds embedded newlines into blank lines; the "|"
+    # block style keeps multi-line values such as PEM private keys intact.
+    style = "|" if "\n" in data else None
+    return dumper.represent_scalar("tag:yaml.org,2002:str", data, style=style)
+
+
+_BlockStringDumper.add_representer(str, _represent_str)
+
+
 UNIT_SECONDS = {
     "DAY": 86400,
     "HOUR": 3600,
@@ -183,7 +197,9 @@ def generate(ctx):
     if replication_tasks:
         definition["replication-tasks"] = replication_tasks
 
-    yaml_text = yaml.safe_dump(definition, default_flow_style=False, sort_keys=False)
+    yaml_text = yaml.dump(
+        definition, Dumper=_BlockStringDumper, default_flow_style=False, sort_keys=False
+    )
     mode = 0o600 if uses_secret else 0o644
     ctx.out.write("usr/local/etc/zettarepl.yaml", yaml_text, mode=mode)
     ctx.note(text("notes", "zettarepl"), "zettarepl")
