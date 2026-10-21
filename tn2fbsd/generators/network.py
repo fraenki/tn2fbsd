@@ -1,9 +1,7 @@
 """Network configuration.
 
 TrueNAS Core does not store the network configuration in rc.conf; it configures
-interfaces live. These functions reconstruct the equivalent rc.conf(5) directives
-following the field semantics of the middleware (plugins/interface/*.py and
-plugins/network.py).
+interfaces live. These functions reconstruct the equivalent rc.conf(5) directives.
 """
 from ..db import as_bool, json_list, words
 

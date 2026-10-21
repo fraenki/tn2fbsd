@@ -1,7 +1,4 @@
-"""NFS shares -> /etc/exports, and NFS service flags -> /etc/rc.conf.
-
-Mirrors the middleware exports builder (etc_files/nfsd.py, plugins/nfs.py).
-"""
+"""NFS shares -> /etc/exports, and NFS service flags -> /etc/rc.conf."""
 from ..db import as_bool, json_list, words
 from ..text import text
 

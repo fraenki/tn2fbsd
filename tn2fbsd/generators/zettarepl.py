@@ -1,8 +1,4 @@
-"""Periodic snapshot + replication tasks -> /usr/local/etc/zettarepl.yaml.
-
-Mirrors the definition assembled by the middleware
-(plugins/zettarepl.py ``get_definition``).
-"""
+"""Periodic snapshot + replication tasks -> /usr/local/etc/zettarepl.yaml."""
 import re
 
 import yaml

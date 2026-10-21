@@ -8,8 +8,8 @@ The sshd_config is built from services_ssh using directives supported by
 base-system OpenSSH 9.x, mapping each TrueNAS option to its current equivalent.
 
 Host keys are stored in the database base64-encoded, the private keys also
-pwenc-encrypted (see plugins/ssh.py save_keys). They are decoded and written to
-/etc/ssh so the migrated server keeps its host identity.
+pwenc-encrypted. They are decoded and written to /etc/ssh so the migrated server
+keeps its host identity.
 """
 import base64
 

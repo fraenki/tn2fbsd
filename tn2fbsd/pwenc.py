@@ -1,20 +1,17 @@
 """Decrypt TrueNAS pwenc-encrypted database fields.
 
-The encryption scheme is derived from the TrueNAS Core middleware, file
-    sources/middleware/src/middlewared/middlewared/plugins/pwenc.py
-(functions ``encrypt``/``decrypt``). It is AES-256-CTR:
+The pwenc scheme is AES-256-CTR:
 
   * key   = the 32 raw bytes of ``pwenc_secret`` (shipped in the export tar when
             "Export Secret Seed" is enabled),
   * the stored value is base64(nonce || ciphertext) with an 8-byte random nonce,
-  * the CTR counter is 64 bits wide and prefixed by the nonce; pycryptodome's
-    ``Counter.new(64, prefix=nonce)`` starts at initial value 1, so the 128-bit
-    IV is ``nonce || (1).to_bytes(8, "big")``,
+  * the CTR counter is 64 bits wide, prefixed by the nonce and starting at 1, so
+    the 128-bit IV is ``nonce || (1).to_bytes(8, "big")``,
   * plaintext is padded with the byte ``{`` to a 32-byte boundary before
     encryption and stripped again on decrypt.
 
-Decryption is performed by shelling out to openssl(1) to avoid a third-party
-Python crypto dependency.
+Decryption shells out to openssl(1); no third-party Python crypto library is
+available on the host.
 """
 import base64
 import json

@@ -1,11 +1,8 @@
 """TrueNAS cron jobs -> /etc/cron.d/tn2fbsd.
 
-TrueNAS stores user cron jobs in tasks_cronjob and runs them through midclt
-(see etc_files/cron.d/middlewared.mako and plugins/cron.py). FreeBSD's cron(8)
-reads /etc/cron.d directly, so each enabled job becomes one system crontab line
-with the user-name field, matching cronjob.construct_cron_command: the five
-schedule fields, the user, an inline PATH, the command, and > /dev/null /
-2> /dev/null when the job hides stdout / stderr.
+Each enabled tasks_cronjob row becomes one /etc/cron.d line: the five schedule
+fields, the user, an inline PATH, the command, and > /dev/null / 2> /dev/null
+when the job hides stdout / stderr.
 """
 from ..db import as_bool
 from ..text import text
