@@ -20,7 +20,7 @@ from .output import OutputTree
 from .source import Source, SourceError
 
 # migration must run last so it can report every written file and note.
-GENERATORS = [network, rcconf, loader, sysctl, nfs, smb, ssh, scrub, cron, zettarepl, migration]
+GENERATORS = [network, rcconf, loader, nfs, sysctl, smb, ssh, scrub, cron, zettarepl, migration]
 
 
 def main(argv=None):

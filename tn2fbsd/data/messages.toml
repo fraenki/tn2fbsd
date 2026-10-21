@@ -20,6 +20,8 @@ ssh_host_keys = "SSH: the TrueNAS host keys were migrated to /etc/ssh so the ser
 ssh_authorized_keys_present = "SSH: root's authorized_keys was migrated to /root/.ssh/authorized_keys (ensure /root/.ssh is mode 0700). Needed when remotes SSH in as root by key, e.g. zettarepl replicating into this system."
 ssh_authorized_keys_absent = "SSH: root's authorized_keys is not in the export (it is included only when 'Export authorized_keys for root' is enabled when saving the config). If remotes SSH in as root by key (e.g. zettarepl replicating into this system), copy /root/.ssh/authorized_keys manually. Non-root users' authorized_keys reside in their home directories and come with the pool."
 ssh_enabled = "SSH: the base-system sshd is enabled (sshd_enable) instead of the ports OpenSSH (openssh_enable). Review /etc/ssh/sshd_config before starting sshd."
+nfs_v3owner = "NFS: NFSv4 uses the numeric ownership model; vfs.nfs.enable_uidtostring and vfs.nfsd.enable_stringtouid are set in /etc/sysctl.conf."
+nfs_nfsuserd = "NFS: NFSv4 name mapping uses nfsuserd{domain}."
 cron = "Cron jobs: the enabled TrueNAS cron jobs were written to {path}. On FreeBSD cron(8) runs them directly as the listed user; review the commands and their paths before enabling cron."
 scrub = "ZFS scrub: FreeBSD's periodic(8) scrub runs daily and only starts a scrub once the per-pool threshold (days) has elapsed. The original per-task cron schedule is not preserved."
 zettarepl = "zettarepl: install the [zettarepl port/package](https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=298860), then enable the service with `sysrc zettarepl_enable=YES` and start it with `service zettarepl start`."

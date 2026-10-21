@@ -3,6 +3,7 @@
 Mirrors the middleware exports builder (etc_files/nfsd.py, plugins/nfs.py).
 """
 from ..db import as_bool, json_list, words
+from ..text import text
 
 
 def _share_lines(share, v4_enabled):
@@ -62,6 +63,30 @@ def generate(ctx):
         lines += _share_lines(share, v4_enabled)
     ctx.out.write("etc/exports", "\n".join(lines))
 
+    if v4_enabled:
+        _v4_owner_mapping(ctx, config)
+
+
+def _v4_owner_mapping(ctx, config):
+    """Apply the NFSv4 owner-mapping model.
+
+    The numeric model (v4_v3owner) passes uid/gid over the wire as numeric
+    strings and needs both sysctls set; otherwise owners are mapped by name
+    through nfsuserd.
+    """
+    if as_bool(config["nfs_srv_v4_v3owner"]):
+        ctx.extra_sysctls += [
+            "vfs.nfs.enable_uidtostring=1",
+            "vfs.nfsd.enable_stringtouid=1",
+        ]
+        ctx.note(text("notes", "nfs_v3owner"), "nfs")
+    else:
+        domain = config["nfs_srv_v4_domain"]
+        ctx.note(
+            text("notes", "nfs_nfsuserd", domain=f" (domain {domain})" if domain else ""),
+            "nfs",
+        )
+
 
 def rcconf_lines(db):
     """NFS service flags for rc.conf (enablement is handled by rcconf.py)."""
@@ -92,6 +117,24 @@ def rcconf_lines(db):
     lines.append(f'nfs_server_flags="{" ".join(server)}"')
     if statd:
         lines.append(f'rpc_statd_flags="{" ".join(statd)}"')
-    if as_bool(config["nfs_srv_v4"]):
+    # Collect nfsuserd flags: -manage-gids from nfs_srv_16 (applies to any NFS
+    # version), and -domain from the NFSv4 domain (only when owners are mapped
+    # by name, not the numeric v4_v3owner model). nfsuserd is enabled when a
+    # flag is set or when NFSv4 name mapping applies.
+    nfsuserd_flags = []
+    if as_bool(config["nfs_srv_16"]):
+        nfsuserd_flags.append("-manage-gids")
+
+    v4 = as_bool(config["nfs_srv_v4"])
+    v3owner = as_bool(config["nfs_srv_v4_v3owner"])
+    if v4:
         lines.append('nfsv4_server_enable="YES"')
+        if not v3owner and config["nfs_srv_v4_domain"]:
+            nfsuserd_flags.append(f'-domain {config["nfs_srv_v4_domain"]}')
+
+    if nfsuserd_flags:
+        lines.append('nfsuserd_enable="YES"')
+        lines.append(f'nfsuserd_flags="{" ".join(nfsuserd_flags)}"')
+    elif v4 and not v3owner:
+        lines.append('nfsuserd_enable="YES"')
     return lines

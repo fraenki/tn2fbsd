@@ -12,6 +12,8 @@ class Context:
         self.notes = []
         # (oid, value, change, freebsd) rows for the MIGRATION.md tunable table.
         self.tunable_changes = []
+        # sysctl.conf lines contributed by non-tunable generators (e.g. NFS).
+        self.extra_sysctls = []
 
     def note(self, text, category="general"):
         self.notes.append((category, text))

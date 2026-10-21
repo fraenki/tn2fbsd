@@ -72,7 +72,7 @@ and groups, and install the required packages.
 | `etc/ssh/sshd_config` | Base-system sshd configuration |
 | `etc/ssh/ssh_host_*` | Migrated SSH host keys (private and public) |
 | `root/.ssh/authorized_keys` | root's authorized_keys (only if included in the export) |
-| `etc/sysctl.conf` | SYSCTL tunables (renamed/removed OIDs translated to FreeBSD 15.1) |
+| `etc/sysctl.conf` | SYSCTL tunables (renamed/removed OIDs translated to FreeBSD 15.1), NFSv4 numeric-ownership sysctls |
 | `etc/periodic.conf` | ZFS scrub tasks |
 | `etc/cron.d/tn2fbsd` | Migrated cron jobs |
 | `boot/loader.conf`, `boot/loader.conf.local` | Bootloader config, LOADER tunables, serial console |
